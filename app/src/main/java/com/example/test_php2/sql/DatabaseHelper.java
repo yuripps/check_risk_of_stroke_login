@@ -7,11 +7,14 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.test_php2.model.User;
+import com.example.test_php2.record;
+import com.example.test_php2.show_pic_arm;
+import com.example.test_php2.show_pic_smile;
 
 /**
  * Created by delaroy on 3/27/17.
  */
-public class DatabaseHelper  extends SQLiteOpenHelper{
+public class DatabaseHelper  extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
 
@@ -24,19 +27,24 @@ public class DatabaseHelper  extends SQLiteOpenHelper{
     private static final String COLUMN_USER_EMAIL = "user_email";
     private static final String COLUMN_USER_PASSWORD = "user_password";
 
+
     private String CREATE_USER_TABLE = "CREATE TABLE " + TABLE_USER + "("
             + COLUMN_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_USER_NAME + " TEXT,"
-            + COLUMN_USER_EMAIL + " TEXT," + COLUMN_USER_PASSWORD + " TEXT" + ")";
+            + COLUMN_USER_EMAIL + " TEXT," + COLUMN_USER_PASSWORD + ")";
+
 
     private String DROP_USER_TABLE = "DROP TABLE IF EXISTS " + TABLE_USER;
 
-    public DatabaseHelper(Context context){
+
+    public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+
     @Override
-    public void onCreate(SQLiteDatabase db){
+    public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_USER_TABLE);
+
     }
 
     @Override
@@ -49,7 +57,7 @@ public class DatabaseHelper  extends SQLiteOpenHelper{
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_USER_NAME, user.getName());
-        values.put(COLUMN_USER_EMAIL, user.getEmail());
+        //values.put(COLUMN_USER_EMAIL, user.getEmail());
         values.put(COLUMN_USER_PASSWORD, user.getPassword());
 
         db.insert(TABLE_USER, null, values);

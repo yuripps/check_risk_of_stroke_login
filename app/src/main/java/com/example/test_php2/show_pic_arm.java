@@ -13,6 +13,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.test_php2.R;
+import com.example.test_php2.sql.DatabaseHelper;
+import com.example.test_php2.sql.DatabaseHelper2;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
@@ -28,7 +30,7 @@ import java.util.Date;
 import java.util.Locale;
 
 public class show_pic_arm extends AppCompatActivity {
-
+    private final AppCompatActivity activity = show_pic_arm.this;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,13 +65,13 @@ public class show_pic_arm extends AppCompatActivity {
         String path = (Environment.getExternalStorageDirectory()+"/"+"arm_"+formatter.format(now)+".jpg");
 
         Ion.with(this)
-                .load("http://a929c383.ngrok.io/pro-android/upload.php")
+                .load("http://b84a9317.ngrok.io/pro-android/upload.php")
                 .setMultipartFile("upload_file", new File(path))
                 .asString()
                 .setCallback(new FutureCallback<String>() {
                     @Override
                     public void onCompleted(Exception e, String result) {
-
+                        process();
                     }
                 });
     }
@@ -93,6 +95,40 @@ public class show_pic_arm extends AppCompatActivity {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+
+
+    }
+    DatabaseHelper2 db = new DatabaseHelper2(activity);
+    Stroke st = new Stroke();
+    public void process(){
+        Ion.with(this)
+                .load("http://b84a9317.ngrok.io/pro-android/upload/arm/test.php")
+                .asString()
+                .setCallback(new FutureCallback<String>() {
+                    @Override
+                    public void onCompleted(Exception e, String result) {
+                        int fz = Integer.parseInt(result);
+
+
+                        if(db.checkArm("yuriyuripps")){
+                            if(fz > (db.avgArm("yuriyuripps"))){
+                                Toast.makeText(getBaseContext(), "Risk!!!", Toast.LENGTH_LONG).show();
+                            }else {
+                                Toast.makeText(getBaseContext(), "Same!!!", Toast.LENGTH_LONG).show();
+                            }
+                            db.updateDistArm(fz, "yuriyuripps");
+                        }else {
+                            if(fz > 130){
+                                Toast.makeText(getBaseContext(), "Risk!!!", Toast.LENGTH_LONG).show();
+                            }else{
+                                Toast.makeText(getBaseContext(), "Same!!!", Toast.LENGTH_LONG).show();
+                            }
+                            db.updateDistArm(fz, "yuriyuripps");
+                        }
+
+
+                    }
+                });
 
 
     }

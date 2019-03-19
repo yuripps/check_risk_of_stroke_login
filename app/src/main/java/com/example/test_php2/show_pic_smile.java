@@ -5,12 +5,15 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 import android.graphics.Matrix;
 
+import com.example.test_php2.sql.DatabaseHelper;
+import com.example.test_php2.sql.DatabaseHelper2;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 import com.luseen.simplepermission.permissions.PermissionActivity;
@@ -26,6 +29,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 public class show_pic_smile extends PermissionActivity {
+    private final AppCompatActivity activity = show_pic_smile.this;
     private boolean mIsUploading = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +57,8 @@ public class show_pic_smile extends PermissionActivity {
         });
 
     }
+
+    float dist = 0;
     public void up_pic(){
         Toast.makeText(getBaseContext(), "อัพโหลดรูป", Toast.LENGTH_LONG).show();
         //String path = Environment.getExternalStorageDirectory() + "/pic_smile.jpg";
@@ -60,13 +66,13 @@ public class show_pic_smile extends PermissionActivity {
         Date now = new Date();
         String path = (Environment.getExternalStorageDirectory()+"/"+"smile_"+formatter.format(now)+".jpg");
         Ion.with(this)
-                .load("http://a929c383.ngrok.io/pro-android/upload.php")
+                .load("http://b84a9317.ngrok.io/pro-android/upload/smile/upload.php")
                 .setMultipartFile("upload_file", new File(path))
                 .asString()
                 .setCallback(new FutureCallback<String>() {
                     @Override
                     public void onCompleted(Exception e, String result) {
-
+                        process();
                     }
                 });
     }
@@ -93,6 +99,39 @@ public class show_pic_smile extends PermissionActivity {
 
 
     }
+
+    DatabaseHelper2 db = new DatabaseHelper2(activity);
+    public void process(){
+        Ion.with(this)
+                .load("http://b84a9317.ngrok.io/pro-android/upload/smile/test.php")
+                .asString()
+                .setCallback(new FutureCallback<String>() {
+                    @Override
+                    public void onCompleted(Exception e, String result) {
+                        float dt = Float.parseFloat(result);
+
+                        if(db.checkSm("yuriyuripps")){
+                            if(dt > db.avgSmile("yuriyuripps")){
+                                Intent intent = new Intent(show_pic_smile.this,rcrisk.class);
+                                startActivity(intent);
+                            }else {
+                                Toast.makeText(getBaseContext(), "Same!!!", Toast.LENGTH_LONG).show();
+                            }
+                            db.updateDistSm(dt, "yuriyuripps");
+                        }else {
+                            if(dt > 4){
+                                Toast.makeText(getBaseContext(), "Risk!!!", Toast.LENGTH_LONG).show();
+                            }else{
+                                Toast.makeText(getBaseContext(), "Same!!!", Toast.LENGTH_LONG).show();
+                            }
+                            db.updateDistSm(dt, "yuriyuripps");
+                        }
+                    }
+                });
+
+
+    }
+
 
 }
 

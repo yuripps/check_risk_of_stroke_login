@@ -1,4 +1,6 @@
 package com.example.test_php2;
+import android.app.Activity;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -16,20 +18,31 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.test_php2.R;
+import com.example.test_php2.sql.DatabaseHelper;
+import com.example.test_php2.sql.DatabaseHelper2;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
 import java.io.File;
 import java.io.IOException;
 
+import com.example.test_php2.sql.DatabaseHelper;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-public class record extends AppCompatActivity implements View.OnClickListener{
 
+
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+//import static com.example.test_php2.sql.DatabaseHelper2.SQL_CREATE_TABLE_SOUND;
+
+public class record extends AppCompatActivity implements View.OnClickListener{
+    private final AppCompatActivity activity = record.this;
     public static final int RECORD_AUDIO = 0;
     private MediaRecorder myAudioRecorder;
     private String output = null;
@@ -157,39 +170,59 @@ public class record extends AppCompatActivity implements View.OnClickListener{
         Date now = new Date();
         String path = Environment.getExternalStorageDirectory()+"/"+"record_"+formatter.format(now)+".wav";;
         Ion.with(this)
-                .load("http://38d5be06.ngrok.io/pro-android/upload/sound/upload.php")
+                .load("http://b84a9317.ngrok.io/pro-android/upload/sound/upload.php")
                 .setMultipartFile("upload_file", new File(path))
                 .asString()
                 .setCallback(new FutureCallback<String>() {
                     @Override
                     public void onCompleted(Exception e, String result) {
-                        //process();
+                        process();
                     }
                 });
     }
-//    public void process(){
-//        Ion.with(this)
-//                .load("http://38d5be06.ngrok.io/pro-android/upload/sound/test.php")
-//                .asString()
-//                .setCallback(new FutureCallback<String>() {
-//                    @Override
-//                    public void onCompleted(Exception e, String result) {
-//                        //int dist = Integer.parseInt(result);
-//                        /*if(dist >= 130) {
-//                            //Toast.makeText(getBaseContext(), "Different", Toast.LENGTH_LONG).show();
-//                            if(dist >= 135){
-//                                Toast.makeText(getBaseContext(), "Different", Toast.LENGTH_LONG).show();
-//                            }else {
-//                                Toast.makeText(getBaseContext(), "Same", Toast.LENGTH_LONG).show();
-//                            }
-//                        }else {
-//                            Toast.makeText(getBaseContext(), "Same", Toast.LENGTH_LONG).show();
-//
-//                        }*/
-//                        Toast.makeText(getBaseContext(), result, Toast.LENGTH_LONG).show();
-//
-//                    }
-//                });
-//    }
+
+    DatabaseHelper2 db = new DatabaseHelper2(activity);
+    Stroke st = new Stroke();
+    public void process(){
+        Ion.with(this)
+                .load("http://b84a9317.ngrok.io/pro-android/upload/sound/test.php")
+                .asString()
+                .setCallback(new FutureCallback<String>() {
+                    @Override
+                    public void onCompleted(Exception e, String result) {
+                        double dist = Double.parseDouble(result);
+
+
+                        if(test(dist)){
+                            Toast.makeText(getBaseContext(), "Risk!!!", Toast.LENGTH_LONG).show();
+                        }else {
+                            Toast.makeText(getBaseContext(), "Same!!!", Toast.LENGTH_LONG).show();
+                        }
+
+                        db.updateDistRc(dist,"yuriyuripps");
+                    }
+                });
+
+
+
+
+    }
+
+    public boolean test(double dist){
+        if(db.checkRc("yuriyuripps")){
+            if(dist > db.avgSound("yuriyuripps")){
+                return true;
+            }else {
+                return false;
+            }
+        }else {
+            if(dist > 130){
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
+
 }
 
